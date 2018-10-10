@@ -1,0 +1,9 @@
+version: '2'
+services:
+  alpine:
+    image: redelivre/alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - "username=$username"
