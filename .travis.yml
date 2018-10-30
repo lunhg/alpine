@@ -10,8 +10,10 @@ matrix:
     - os: linux
       services: docker
       env:
-        - LABEL="aarch64-gcc"
-        - ENABLE_DOCKER="true"
+        - LABEL=aarch64-gcc
+        - ENABLE_DOCKER=true
+        - SPEC=linux_aarch64
+        - PLATFORM=aarch64-linux64-gcc
 
 env:
   DOCKER_COMPOSE_VERSION: 1.22.0
