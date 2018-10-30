@@ -1,10 +1,20 @@
+language: bash
+
+# Default linux jobs
+os: linux
 sudo: required
+dist: trusty
+
+matrix:
+  include:
+    - os: linux
+      services: docker
+      env:
+        - LABEL="aarch64-gcc"
+        - ENABLE_DOCKER="true"
 
 env:
   DOCKER_COMPOSE_VERSION: 1.22.0
-
-services:
-  - docker
 
 before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
