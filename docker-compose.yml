@@ -1,7 +1,7 @@
 version: '2'
 services:
   alpine:
-    image: lunhg/alpine:latest
+    image: redelivre/alpine:latest
     build:
       context: .
       dockerfile: Dockerfile
