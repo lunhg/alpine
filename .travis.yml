@@ -18,4 +18,11 @@ script:
   - docker-compose up -d alpine
   - docker-compose ps alpine
   - docker-compose logs alpine
+
+after_success:
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
   - docker-compose push alpine
+
+# don't notify me when things fail
+notifications:
+  email: false
