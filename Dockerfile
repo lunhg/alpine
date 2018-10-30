@@ -1,4 +1,4 @@
-FROM forumi0721alpineaarch64/alpine-aarch64-dev
+FROM alpine:latest
 ARG username
 RUN apk --update upgrade \
     && apk add --virtual build-essentials alpine-sdk linux-headers binutils-gold gnupg libgcc libstdc++ make xz python tcl \
