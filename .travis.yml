@@ -11,30 +11,25 @@ cache:
 
 env:
     global:
-      - QEMU_VER=v2.12.0
-      - DOCKER_COMPOSE_VERSION=1.22.0
-
+      - QEMU_ARCHES=aarch64 QEMU_VERSION=v2.12.0 DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
   - curl -L https://raw.githubusercontent.com/jdub/travis-qemu/master/travis-qemu.sh -o travis-qemu.sh
   - chmod +x travis-qemu.sh
+  - travis-qemu.sh
+  - export PATH=$PATH:$HOME/qemu/bin
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - docker -v
   - docker-compose -v
-
-before_script:
-  - QEMU_ARCHES="aarch64" bash -e travis-qemu.sh
-  - export PATH=$PATH:$HOME/qemu/bin
-
+  
 script:
-  - docker-compose up -d alpine
-  - docker-compose ps alpine
-  - docker-compose logs alpine
+  - qemu-$QEMU_ARCHES -L /usr/$QEMU_ARCHES-linux-gnu/ docker-compose up -d alpine
 
 after_success:
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - docker-compose push alpine
+  - qemu-$QEMU_ARCHES -L /usr/$QEMU_ARCHES-linux docker-compose ps alpine
+  - qemu-$QEMU_ARCHES -L /usr/$QEMU_ARCHES-linux docker-compose logs alpine
+  - qemu-$QEMU_ARCHES -L /usr/$QEMU_ARCHES-linux docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 # don't notify me when things fail
 notifications:
