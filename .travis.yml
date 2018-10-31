@@ -10,13 +10,15 @@ cache:
     - $HOME/qemu
 
 env:
-    global:
-      - QEMU_ARCHES=aarch64 QEMU_VERSION=3.0.0 DOCKER_COMPOSE_VERSION=1.22.0
+  global:
+    - QEMU_ARCHES=aarch64 QEMU_VERSION=3.0.0 DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
   - make install
-  - export PATH=$PATH:$HOME/qemu/bin
-  - export PATH=$PATH:$HOME/docker-compose/bin
+  - for i in "qemu" "docker-compose" ; do \
+      export PATH=$PATH:$HOME/$i/bin ; \
+    done
+    
 
 script:
   - make build
