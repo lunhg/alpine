@@ -5,24 +5,27 @@ os: linux
 sudo: required
 dist: trusty
 
-matrix:
-  include:
-    - os: linux
-      services: docker
-      env:
-        - LABEL=aarch64-gcc
-        - ENABLE_DOCKER=true
-        - SPEC=linux_aarch64
-        - PLATFORM=aarch64-linux64-gcc
+cache:
+  directories:
+    - $HOME/qemu
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.22.0
+    global:
+      - QEMU_VER=v2.12.0
+      - DOCKER_COMPOSE_VERSION=1.22.0
+
 
 before_install:
+  - curl -L https://raw.githubusercontent.com/jdub/travis-qemu/master/travis-qemu.sh
+  - chmod +x travis-qemu.sh
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - docker -v
   - docker-compose -v
+
+before_script:
+  - QEMU_ARCHES="aarch64" bash -e travis-qemu.sh
+  - export PATH=$PATH:$HOME/qemu/bin
 
 script:
   - docker-compose up -d alpine
