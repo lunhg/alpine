@@ -11,7 +11,8 @@ cache:
 
 env:
     global:
-      - QEMU_VER=v2.12.0
+      - QEMU_VERSION=v2.12.0
+      - QEMU_ARCHES="aarch64"
       - DOCKER_COMPOSE_VERSION=1.22.0
 
 
@@ -24,13 +25,13 @@ before_install:
   - docker-compose -v
 
 before_script:
-  - QEMU_ARCHES="aarch64" bash -e travis-qemu.sh
+  - bash -e travis-qemu.sh
   - export PATH=$PATH:$HOME/qemu/bin
 
 script:
-  - docker-compose up -d alpine
-  - docker-compose ps alpine
-  - docker-compose logs alpine
+  - qemu-aarch64 docker-compose up -d alpine
+  - qemu-aarch64 docker-compose ps alpine
+  - qemu-aarch64 docker-compose logs alpine
 
 after_success:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
