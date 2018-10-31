@@ -14,15 +14,13 @@ env:
       - QEMU_ARCHES=aarch64 QEMU_VERSION=3.0.0 DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
-  - make qemu
-  - make compose
-  - make check
-  
+  - make install
+
 script:
   - make build
+  - make print
 
 after_success:
-  - make success
   - make push
 
 # don't notify me when things fail

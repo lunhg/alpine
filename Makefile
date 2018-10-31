@@ -4,8 +4,10 @@ qemu:
   export PATH=$PATH:$HOME/qemu/bin
 
 docker_compose:
-	@curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  chmod +x docker-compose
+	mkdir -p $HOME/bin
+	@curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > $HOME/bin/docker-compose
+  chmod +x $HOME/docker-compose
+	export PATH=$PATH:$HOME/bin
 
 versions:
 	docker -v
