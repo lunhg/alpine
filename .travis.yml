@@ -16,15 +16,15 @@ env:
 
 
 before_install:
-  - curl -L https://raw.githubusercontent.com/jdub/travis-qemu/master/travis-qemu.sh
-  - chmod +x travis-qemu.sh
+  - curl -L https://raw.githubusercontent.com/jdub/travis-qemu/master/travis-qemu.sh -o- qemu
+  - chmod +x qemu
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - docker -v
   - docker-compose -v
 
 before_script:
-  - QEMU_ARCHES="aarch64" bash -e travis-qemu.sh
+  - QEMU_ARCHES="aarch64" bash -e qemu
   - export PATH=$PATH:$HOME/qemu/bin
 
 script:
