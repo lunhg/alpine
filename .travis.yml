@@ -5,20 +5,14 @@ os: linux
 sudo: required
 dist: trusty
 
-services:
-  - docker
-  - docker-compose
-
 cache:
   directories:
     - $HOME/qemu
 
-env:
-  global:
-    - QEMU_ARCHES=aarch64 QEMU_VERSION=3.0.0
-
 before_install:
   - make build
+  - make env
+  - make before_install
 
 before_script:
   - make install

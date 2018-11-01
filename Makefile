@@ -1,5 +1,4 @@
 USER={USER:=$$USER}
-DOCKER_COMPOSE_URL:=https://github.com/docker/compose/releases/download/$$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m`
 
 build_python_urlib3:
 	sudo apt-get install python-pip
@@ -13,15 +12,12 @@ build_python_shyaml:
 build_python: build_python_urlib3 build_python_shyaml
 
 build_qemu:
-	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu
-	VERSION=`cat .qemu.yml | shyaml get-value qemu.version`
-	ARCHES=`cat .qemu.yml | shyaml get-value qemu.arches`
-  TARGETS=`cat .qemu.yml | shyaml get value qemu.targets`;
-	echo "QEMU $VERSION: $ARCHES $TARGETS"
+	export QEMU_ARCHES=`cat .qemu.yml | shyaml get-value qemu.arch`
+	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu	
 	cd $HOME/qemu
-	./configure \
+	bash -e ./configure \
 		--prefix="$HOME/qemu" \
-		--target-list="$TARGETS" \
+		--target-list=`cat .qemu.yml | shyaml get-value qemu.targes` \
 		--enable-debug \
 		--disable-docs \
 		--disable-sdl \
@@ -33,10 +29,20 @@ build_qemu:
 		--static
 	make -j4
 	make install
-	echo "$VERSION $TARGETS" > $HOME/qemu/.build
+	echo  `cat .qemu.yml | shyaml get-value qemu.version` `cat .qemu.yml | shyaml get-value qemu.targes` > $HOME/qemu/.build
 	export PATH=$$PATH:$HOME/qemu/bin
 
 build: build_python build_qemu
+
+env:
+	for i in cat .qemu.yml | shyaml get-value qemu.env ; do \
+			qemu-$$QEMU_ARCHES export $i ; \
+	done
+
+before_install:
+	for i in cat .qemu.yml | shyaml get-value qemu.before_install ; do \
+			qemu-$$QEMU_ARCHES $i ; \
+	done
 
 install:
 	for i in cat .qemu.yml | shyaml get-value qemu.install ; do \

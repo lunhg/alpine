@@ -1,17 +1,36 @@
 qemu:
-  install:
-    - export USER=`cat /proc/sys/kernel/random/uuid`
-    - apt-get install sudo git python curl
+  version: '3.0.0'
+
+  arches:
+    - aarch64
+
+  targets:
+    - softmmu
+    - linux-user
+
+  env:
+    - DOCKER-VERSION=18.03
+    - DOCKER_COMPOSE_VERSION=1.22.0
+    - USER=`cat /proc/sys/kernel/random/uuid`
+    - PWD=`cat /proc/sys/kernel/random/uuid`
+
+  before_install:
     - adduser -G wheel -D -h /home/$USER $USER
-    - echo %wheel ALL=(ALL) NOPASSWD:ALL >> /etc/sudoers
-    - chown -R qemu: /home/$USER
-    - mkdir -p /home/$USER/bin
+    - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    - chown -R $USER: /home/$USER
+
+  install:
+    - echo $PWD | su - $USER
+    - curl https://releases.rancher.com/install-docker/$DOCKER_VERSION.sh | sh > /home/$USER/bin/docker
+    - curl -L https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m` > /home/$USER/bin/docker-compose
+    
 
   after_install:
-    - curl -L $$DOCKER_COMPOSE_URL > /home/$USER/bin/docker-compose
+    - chmod +x /home/$USER/bin/docker
     - chmod +x /home/$USER/bin/docker-compose
+    - apt-get install sudo git python curl
     - export PATH=$$PATH:/home/$USER/bin
-
+  
   before_script:
     - git clone --branch=$$QEMU_ARCHES https://www.github.com/lunhg/alpine /home/$USER/alpine
 
