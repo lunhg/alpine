@@ -1,0 +1,27 @@
+qemu:
+  install:
+    - export USER=`cat /proc/sys/kernel/random/uuid`
+    - apt-get install sudo git python curl
+    - adduser -G wheel -D -h /home/$USER $USER
+    - echo %wheel ALL=(ALL) NOPASSWD:ALL >> /etc/sudoers
+    - chown -R qemu: /home/$USER
+    - mkdir -p /home/$USER/bin
+
+  after_install:
+    - curl -L $$DOCKER_COMPOSE_URL > /home/$USER/bin/docker-compose
+    - chmod +x /home/$USER/bin/docker-compose
+    - export PATH=$$PATH:/home/$USER/bin
+
+  before_script:
+    - git clone --branch=$$QEMU_ARCHES https://www.github.com/lunhg/alpine /home/$USER/alpine
+
+  script:
+    - cd /home/$USER/alpine
+    - docker-compose up -d alpine
+    - docker-compose ps alpine
+    - docker-compose logs alpine
+
+  after_success:
+    - cd /home/$USER/alpine
+    - docker login -u $$DOCKER_USERNAME -p $$DOCKER_PASSWORD
+    - docker-compose push alpine

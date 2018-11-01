@@ -18,15 +18,18 @@ env:
     - QEMU_ARCHES=aarch64 QEMU_VERSION=3.0.0
 
 before_install:
-  - make install
-  - export PATH=$PATH:$HOME/qemu/bin
-    
-script:
   - make build
-  - make print
+
+before_script:
+  - make install
+  - make after_install
+  - make before_script
+
+script:
+  - make script
 
 after_success:
-  - make push
+  - make after_success
 
 # don't notify me when things fail
 notifications:
