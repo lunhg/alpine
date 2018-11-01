@@ -1,9 +1,7 @@
 USER={USER:=$$USER}
-__QEMU_TARGETS__=""
-__QEMU_FLAGS__=""
 
 build_python_urlib3:
-	sudo pip install --upgrade pip==18.1
+	sudo pip -H install --upgrade pip==18.1
 	pip --version
 	sudo pip install urllib3[secure] ndg-httpsclient
 
@@ -13,14 +11,16 @@ build_python_shyaml:
 build_python: build_python_urlib3 build_python_shyaml
 
 build_qemu_targets:
+	local __QEMU_TARGETS__=""
 	for i in `cat .qemu.yml | shyaml get-value arches` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets` ; do \
-			__QEMU_TARGETS__ = ${__QEMU_TARGETS__}$i-$j" " ; \
+			__QEMU_TARGETS__ = ((__QEMU_TARGETS__"$i-$j ")); \
 		done \
 	done
 	export QEMU_TARGETS=${__QEMU_TARGETS__}
 
 build_qemu_flags:
+	local __QEMU_FLAGS__=""
 	for i in "--prefix=/home/$$USER/qemu" \
 					 "--target-list=$$QEMU_TARGETS" \
 		       "--enable-debug" \
@@ -32,7 +32,7 @@ build_qemu_flags:
 					 "--disable-nettle" \
 					 "--disable-curses" \
 					 "--static" ; do \
-		__QEMU_FLAGS__ = "${__QEMU_FLAGS__} $i" ; \
+		__QEMU_FLAGS__ = ((__QEMU_FLAGS__" $i")) ; \
 	done
 	export QEMU_FLAGS=${__QEMU_FLAGS__}
 
