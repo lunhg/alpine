@@ -5,6 +5,8 @@ ARCHES={$$QEMU_ARCHES:=arm aarch64 i386 x86_64}
 TARGETS={$$QEMU_TARGETS:=$(echo $ARCHES | sed 's#$# #;s#\([^ ]*\) #\1-softmmu \1-linux-user #g')}
 
 build:
+	pip install urllib3[secure]
+	python -c "import urllib3.contrib.pyopenssl; urllib3.contrib.pyopenssl.inject_into_urllib3()"
 	pip install shyaml
 	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu
 	if echo "$VERSION $TARGETS" | cmp --silent $HOME/qemu/.build -; then echo "==> qemu $VERSION up to date!" && exit 0 ; fi
