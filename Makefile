@@ -1,8 +1,7 @@
 USER={USER:=$$USER}
 
 build_python_urlib3:
-	sudo apt-get install python-pip
-	sudo pip install --upgrade --index-url=https://pypi.python.org/simple/ pip==8.1.2
+	sudo pip install --upgrade
 	pip --version
 	sudo pip install urllib3[secure] ndg-httpsclient
 
