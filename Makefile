@@ -5,7 +5,7 @@ ARCHES={$$QEMU_ARCHES:=arm aarch64 i386 x86_64}
 TARGETS={$$QEMU_TARGETS:=$(echo $ARCHES | sed 's#$# #;s#\([^ ]*\) #\1-softmmu \1-linux-user #g')}
 
 build_python_urlib3:
-	apt-get install python-pip
+	sudo apt-get install python-pip
 	sudo pip install --upgrade --index-url=https://pypi.python.org/simple/ pip==8.1.2
 	pip --version
 	sudo pip install urllib3[secure] ndg-httpsclient
