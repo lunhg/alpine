@@ -13,7 +13,7 @@ build_python: build_python_urlib3 build_python_shyaml
 build_qemu_targets:
 	for i in `cat .qemu.yml | shyaml get-value arches` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets` ; do \
-			$__QEMU_TARGETS__ = "$i-$j " ; \
+			__QEMU_TARGETS__ = "${__QEMU_TARGETS__} $i-$j" ; \
 		done \
 	done
 	export QEMU_TARGETS=${__QEMU_TARGETS__}
@@ -30,7 +30,7 @@ build_qemu_flags:
 					 "--disable-nettle" \
 					 "--disable-curses" \
 					 "--static" ; do \
-		__QEMU_FLAGS__ = $__QEMU_FLAGS__" $i" ; \
+		__QEMU_FLAGS__ = "${__QEMU_FLAGS__} $i" ; \
 	done
 	export QEMU_FLAGS=${__QEMU_FLAGS__}
 
