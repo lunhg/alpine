@@ -6,7 +6,7 @@ install:
 
 build:
 	qemu-$$QEMU_ARCHES apt-get install curl
-	qemu-$$QEMU_ARCHES curl -L ${URL} > /usr/bin/docker-compose
+	sudo qemu-$$QEMU_ARCHES curl -L ${URL} > /usr/bin/docker-compose
 	chmod +x /usr/bin/docker-compose
 	qemu-$$QEMU_ARCHES docker-compose up -d alpine
 
