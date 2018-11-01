@@ -13,7 +13,7 @@ build_python: build_python_urlib3 build_python_shyaml
 build_qemu_targets:
 	for i in `cat .qemu.yml | shyaml get-value arches` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets` ; do \
-			__QEMU_TARGETS__ = "${__QEMU_TARGETS__} $i-$j" ; \
+			__QEMU_TARGETS__ = "${__QEMU_TARGETS__} ${i}-${j}" ; \
 		done \
 	done
 	export QEMU_TARGETS=${__QEMU_TARGETS__}
@@ -30,7 +30,7 @@ build_qemu_flags:
 					 "--disable-nettle" \
 					 "--disable-curses" \
 					 "--static" ; do \
-		__QEMU_FLAGS__ = "${__QEMU_FLAGS__} $i" ; \
+		__QEMU_FLAGS__ = "${__QEMU_FLAGS__} ${i}" ; \
 	done
 	export QEMU_FLAGS=${__QEMU_FLAGS__}
 
@@ -40,7 +40,13 @@ build_qemu_build:
 	bash -e ./configure $$QEMU_FLAGS
 	make -j4
 	make install
-	echo `cat .qemu.yml | shyaml get-value version `" "$$QEMU_TARGETS > /home/$$USER/qemu/.build
+	__QEMU_BUILD__=""
+	for i in `cat .qemu.yml | shyaml get-value version`
+			$$QEMU_TARGETS ; do \
+		__QEMU_BUILD__="${__QEMU_BUILD__} ${i}" ; \
+	done
+	echo "${__QEMU_BUILD__}" > /home/$$USER/qemu/.build
+	export QEMU_BUILD=/home/$$USER/qemu/.build
 	export PATH=$$PATH:/home/$$USER/qemu/bin
 
 build_qemu: build_qemu_targets build_qemu_flags
