@@ -29,7 +29,7 @@ build_qemu_flags:
 					 "--disable-nettle" \
 					 "--disable-curses" \
 					 "--static" ; do \
-		export QEMU_FLAGS = $$QEMU_FLAGS" "$i ; \
+		export QEMU_FLAGS+=$$QEMU_FLAGS" "$i ; \
 	done
 
 build_qemu_build:
