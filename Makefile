@@ -1,8 +1,5 @@
 USER={USER:=$$USER}
 DOCKER_COMPOSE_URL:=https://github.com/docker/compose/releases/download/$$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m`
-VERSION={$$QEMU_VERSION:=3.0.0}
-ARCHES={$$QEMU_ARCHES:=arm aarch64 i386 x86_64}
-TARGETS={$$QEMU_TARGETS:=$(echo $ARCHES | sed 's#$# #;s#\([^ ]*\) #\1-softmmu \1-linux-user #g')}
 
 build_python_urlib3:
 	sudo apt-get install python-pip
@@ -17,9 +14,10 @@ build_python: build_python_urlib3 build_python_shyaml
 
 build_qemu:
 	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu
-	if echo "$VERSION $TARGETS" | cmp --silent $HOME/qemu/.build -; then echo "==> qemu $VERSION up to date!" && exit 0 ; fi
-	echo "VERSION: $VERSION"
-	echo "TARGETS: $TARGETS"
+	VERSION=`cat .qemu.yml | shyaml get-value qemu.version`
+	ARCHES=`cat .qemu.yml | shyaml get-value qemu.arches`
+  TARGETS=`cat .qemu.yml | shyaml get value qemu.targets`;
+	echo "QEMU $VERSION: $ARCHES $TARGETS"
 	cd $HOME/qemu
 	./configure \
 		--prefix="$HOME/qemu" \
