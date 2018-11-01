@@ -4,12 +4,18 @@ VERSION={$$QEMU_VERSION:=3.0.0}
 ARCHES={$$QEMU_ARCHES:=arm aarch64 i386 x86_64}
 TARGETS={$$QEMU_TARGETS:=$(echo $ARCHES | sed 's#$# #;s#\([^ ]*\) #\1-softmmu \1-linux-user #g')}
 
-build:
-  python -c "import urllib3; urllib3.disable_warnings()"
+build_python_urlib3:
+	python -c "import urllib3; urllib3.disable_warnings()"
 	sudo pip install urllib3 --upgrade
 	sudo pip install urllib3[secure] --upgrade
 	python -c "import urllib3.contrib.pyopenssl; urllib3.contrib.pyopenssl.inject_into_urllib3()"
+
+build_python_shyaml:
 	sudo pip install shyaml
+
+build_python: build_python_urlib3 build_python_shyaml
+
+build_qemu:
 	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu
 	if echo "$VERSION $TARGETS" | cmp --silent $HOME/qemu/.build -; then echo "==> qemu $VERSION up to date!" && exit 0 ; fi
 	echo "VERSION: $VERSION"
@@ -31,6 +37,8 @@ build:
 	make install
 	echo "$VERSION $TARGETS" > $HOME/qemu/.build
 	export PATH=$$PATH:$HOME/qemu/bin
+
+build: build_python build_qemu
 
 install:
 	for i in cat .qemu.yml | shyaml get-value qemu.install ; do \
