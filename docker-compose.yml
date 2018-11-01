@@ -1,8 +1,7 @@
 version: '2'
 services:
   alpine:
-    image: redelivre/alpine-aarch64:latest
-    build:
+    image: redelivre/alpine-aarch64:latest    build:
       context: .
       dockerfile: Dockerfile
       args:
