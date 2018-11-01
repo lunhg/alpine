@@ -10,7 +10,7 @@ build:
 	if echo "$VERSION $TARGETS" | cmp --silent $HOME/qemu/.build -; then echo "==> qemu $VERSION up to date!" && exit 0 ; fi
 	echo "VERSION: $VERSION"
 	echo "TARGETS: $TARGETS"
-  cd $HOME/qemu
+	cd $HOME/qemu
 	./configure \
 		--prefix="$HOME/qemu" \
 		--target-list="$TARGETS" \
@@ -29,12 +29,12 @@ build:
 	export PATH=$$PATH:$HOME/qemu/bin
 
 install:
-  for i in cat .qemu.yml | shyaml get-value qemu.install ; do \
+	for i in cat .qemu.yml | shyaml get-value qemu.install ; do \
 			qemu-$$QEMU_ARCHES $i ; \
 	done
 
 after_install:
-  for i in cat .qemu.yml | shyaml get-value qemu.after_install ; do \
+	for i in cat .qemu.yml | shyaml get-value qemu.after_install ; do \
 			qemu-$$QEMU_ARCHES $i ; \
 	done
 
