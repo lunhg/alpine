@@ -10,10 +10,11 @@ cache:
     - $HOME/qemu
 
 before_install:
+  - make docker
   - make build
   - make env
   - make before_install
-
+  - 
 before_script:
   - make install
   - make after_install

@@ -1,13 +1,9 @@
 arches:
-  - i386
-  - x86_64
-  - arm
-  - aarch64
+  - armhf
+  - arm64
 
 targets:
-  - bionic
-  - softmmu
-  - linux-user
+  - jessie
 
 env:
   - DOCKER-VERSION=18.03
