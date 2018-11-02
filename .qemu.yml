@@ -9,13 +9,14 @@ apt:
   - curl
   - python
 
+pip:
+  - shyaml
+
 env:
   - DOCKER-VERSION=18.03
   - DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
-  - apt-get install python
-  - pip install shyaml
   - adduser -G wheel -D -h /home/$USER $USER
   - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
   - chown -R $USER: /home/$USER
