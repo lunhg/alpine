@@ -1,5 +1,5 @@
 USER={USER:=$$USER}
-NAME=$$(cat /proc/sys/kernel/random/uuid)
+NAME=`cat /proc/sys/kernel/random/uuid`
 docker:
 	mkdir -p bin
 	@docker run --rm --privileged -t multiarch/qemu-user-static:register --reset
