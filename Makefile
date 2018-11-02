@@ -1,11 +1,23 @@
 USER={USER:=$$USER}
-
+NAME=$$(cat /proc/sys/kernel/random/uuid)
 docker:
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	mkdir -p bin
+	@docker run --rm \
+							--privileged \
+							multiarch/qemu-user-static:register \
+							--reset
+	@docker service create \
+		--mount 'type=volume,src=$$HOME/bin,dest=/usr/local/bin,volume-driver=local' \
+		--name $$NAME
 
 build:
 	sudo pip install shyaml
-	mkdir bin
+	mkdir -p bin
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j sudo apt-get install python ; \
+		done \
+	done
 
 env:
 	if [ -f bin/env.py ] ; then \
@@ -17,17 +29,11 @@ env:
 		echo "$$i" >> bin/env.py ; \
 	done
 	cat .qemu.yml | shyaml get-value env | sed -E 's|-\s(.+)=(.+)|os.environ["\1"] = "\2"|g' >> bin/env.py
-	for i in 'os.environ["USER"] = uuid.uuid4().hex' \
-			'os.environ["PWD"] = uuid.uuid4().hex'  ; do \
-		echo "$$i" >> bin/env.py ; \
-	done
+	echo 'for k,v in os.environ.iteritems(): ' >> bin/env.py
+	echo '  print "%s: %s" % (k, v)' >> bin/env.py
 	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
-			docker run --rm \
-				-t multiarch/debian-debootstrap:$$i-$$j \
-				-u $$(whoami) \
-				-v bin/env.py:/usr/bin/qenv \
-				uname -a && qenv ; \
+			docker run --rm --name=$$NAME --user=$$(id -u):$$(id -g) multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/$$NAME-env.py ; \
 		done \
 	done
 
@@ -36,8 +42,12 @@ before_install:
 		rm bin/before_install.py ; \
 	fi
 	echo "import os" >> bin/before_install.py
-	cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> before_install.py
-	python bin/before_install.py
+	cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/before_install.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/$$NAME-before_install ; \
+		done \
+	done
 
 install:
 	if [ -d bin/install.py ] ; then \
