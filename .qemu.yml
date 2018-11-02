@@ -1,18 +1,21 @@
-version: '3.0.0'
 arches:
+  - i386
+  - x86_64
+  - arm
   - aarch64
-  
+
 targets:
+  - bionic
   - softmmu
   - linux-user
 
 env:
   - DOCKER-VERSION=18.03
   - DOCKER_COMPOSE_VERSION=1.22.0
-  - USER=`cat /proc/sys/kernel/random/uuid`
-  - PWD=`cat /proc/sys/kernel/random/uuid`
 
 before_install:
+  - apt-get install python
+  - pip intall shyaml
   - adduser -G wheel -D -h /home/$USER $USER
   - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
   - chown -R $USER: /home/$USER
@@ -32,13 +35,13 @@ before_script:
   - git clone --branch=$$QEMU_ARCHES https://www.github.com/lunhg/alpine /home/$USER/alpine
   
 script:
-  - cd /home/$USER/alpine
-  - docker-compose up -d alpine
-  - docker-compose ps alpine
-  - docker-compose logs alpine
+  - cd /home/$USER/qemu
+  - docker-compose up -d qemu
+  - docker-compose ps qemu
+  - docker-compose logs qemu
   
 after_success:
-  - cd /home/$USER/alpine
+  - cd /home/$USER/qemu
   - docker login -u $$DOCKER_USERNAME -p $$DOCKER_PASSWORD
-  - docker-compose push alpine
+  - docker-compose push qemu
   

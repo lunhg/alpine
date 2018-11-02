@@ -1,87 +1,58 @@
 USER={USER:=$$USER}
 
-build_python_urlib3:
-	sudo pip install urllib3[secure] ndg-httpsclient
-
-build_python_shyaml:
+build:
 	sudo pip install shyaml
-
-build_python: build_python_urlib3 build_python_shyaml
-
-build_qemu_targets:
-	export QEMU_TARGETS=""
-	for i in `cat .qemu.yml | shyaml get-value arches` ; do \
-		for j in `cat .qemu.yml | shyaml get-value targets` ; do \
-			export QEMU_TARGETS+=$$QEMU_TARGETS"  "$i-$j ; \
-		done \
-	done
-
-build_qemu_flags:
-	export QEMU_FLAGS=""
-	for i in "--prefix=/home/$$USER/qemu" \
-					 "--target-list=$$QEMU_TARGETS" \
-		       "--enable-debug" \
-					 "--disable-docs" \
-					 "--disable-sdl" \
-					 "--disable-gtk" \
-				   "--disable-gnutls" \
-					 "--disable-gcrypt" \
-					 "--disable-nettle" \
-					 "--disable-curses" \
-					 "--static" ; do \
-		export QEMU_FLAGS+=$$QEMU_FLAGS" "$i ; \
-	done
-
-build_qemu_build:
-	git clone https://git.qemu.org/git/qemu.git $$HOME/qemu	
-	cd $HOME/qemu
-	bash -e ./configure $$QEMU_FLAGS
-	make -j4
-	make install
-	__QEMU_BUILD__=""
-	for i in `cat .qemu.yml | shyaml get-value version`
-			$$QEMU_TARGETS ; do \
-		__QEMU_BUILD__="${__QEMU_BUILD__} ${i}" ; \
-	done
-	echo "${__QEMU_BUILD__}" > /home/$$USER/qemu/.build
-	export QEMU_BUILD=/home/$$USER/qemu/.build
-	export PATH=$$PATH:/home/$$USER/qemu/bin
-
-build_qemu: build_qemu_targets build_qemu_flags
-
-build: build_python build_qemu
+	mkdir bin
 
 env:
-	for i in cat .qemu.yml | shyaml get-value env ; do \
-			qemu-$$QEMU_ARCHES export $i ; \
-	done
+	if [ -d bin/env.py ] ; then \
+		rm bin/env.py ; \
+	fi
+	echo "import os " >> bin/env.py
+	echo "import uuid " >> bin/env.py
+	cat .qemu.yml | shyaml get-value env | sed -E 's|-\s(.+)=(.+)|os.environ["\1"] = "\2"|g' >> bin/env.py
+	echo 'os.environ["USER"] = uuid.uuid4().hex' >> bin/env.py
+	echo 'os.environ["PWD"] = uuid.uuid4().hex' >> bin/env.py
+	echo 'print "%s: %s" % (k, v) for k,v in os.environ.iteritems()' >> bin/env.py
 
 before_install:
-	for i in cat .qemu.yml | shyaml get-value before_install ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/before_install.py ] ; then \
+		rm bin/before_install.py ; \
+	fi
+	echo "import os" >> bin/before_install.py
+	cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> before_install.py
 
 install:
-	for i in cat .qemu.yml | shyaml get-value install ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/install.py ] ; then \
+		rm bin/install.py ; \
+	fi
+	echo "import os" >> bin/install.py
+	cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|os.system("\1")|g' >> install.py
 
 after_install:
-	for i in cat .qemu.yml | shyaml get-value after_install ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/after_install.py ] ; then \
+		rm bin/after_install.py ; \
+	fi
+	echo "import os" >> bin/after_install.py
+	cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/after_install.py
 
 before_script:
-	for i in cat .qemu.yml | shyaml get-value before_script ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/before_script.py ] ; then \
+		rm bin/before_script.py ; \
+	fi
+	echo "import os" >> bin/before_script.py
+	cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/before_script.py
 
 script:
-	for i in cat .qemu.yml | shyaml get-value script ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/script.py ] ; then \
+		rm bin/script.py ; \
+	fi
+	echo "import os" >> bin/script.py
+	cat .qemu.yml | shyaml get-value script | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/script.py
 
 after_success:
-	for i in cat .qemu.yml | shyaml get-value after_success ; do \
-			qemu-$$QEMU_ARCHES $i ; \
-	done
+	if [ -d bin/after_success.py ] ; then \
+		rm bin/after_success.py ; \
+	fi
+	echo "import os" >> bin/after_success.py
+	cat .qemu.yml | shyaml get-value after_success | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/after_success.py
