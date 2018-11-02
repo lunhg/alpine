@@ -2,7 +2,7 @@ USER={USER:=$$USER}
 docker:
 	mkdir -p bin
 	@docker run --rm --privileged -t multiarch/qemu-user-static:register --reset
-	@docker service create --mount 'type=volume,src=$$HOME/bin,dst=/usr/local/bin,volume-driver=local' --name qemu
+	@docker service create --mount 'type=volume,src=bin/,dst=/usr/local/bin,volume-driver=local' --name qemu
 	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 			docker run --name=qemu --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j uname -a ; \
