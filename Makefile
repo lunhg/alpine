@@ -7,7 +7,7 @@ docker:
 							multiarch/qemu-user-static:register \
 							--reset
 	@docker service create \
-		--mount 'type=volume,src=$$HOME/bin,dest=/usr/local/bin,volume-driver=local' \
+		--mount 'type=volume,src=$$HOME/bin,dst=/usr/local/bin,volume-driver=local' \
 		--name $$NAME
 
 build:
@@ -33,7 +33,7 @@ env:
 	echo '  print "%s: %s" % (k, v)' >> bin/env.py
 	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
-			docker run --rm --name=$$NAME --user=$$(id -u):$$(id -g) multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/$$NAME-env.py ; \
+			docker run --rm --name=$$NAME --user=$$(id -u):$$(id -g) multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/env.py ; \
 		done \
 	done
 
@@ -45,7 +45,7 @@ before_install:
 	cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/before_install.py
 	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
-			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/$$NAME-before_install ; \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/before_install.py ; \
 		done \
 	done
 
@@ -54,8 +54,12 @@ install:
 		rm bin/install.py ; \
 	fi
 	echo "import os" >> bin/install.py
-	cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|os.system("\1")|g' >> install.py
-	python bin/install.py
+	cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/install.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/install.py ; \
+		done \
+	done
 
 after_install:
 	if [ -d bin/after_install.py ] ; then \
@@ -63,7 +67,11 @@ after_install:
 	fi
 	echo "import os" >> bin/after_install.py
 	cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/after_install.py
-	python bin/after_install.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/after_install.py ; \
+		done \
+	done
 
 before_script:
 	if [ -d bin/before_script.py ] ; then \
@@ -71,6 +79,11 @@ before_script:
 	fi
 	echo "import os" >> bin/before_script.py
 	cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/before_script.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/before_script.py ; \
+		done \
+	done
 
 script:
 	if [ -d bin/script.py ] ; then \
@@ -78,6 +91,11 @@ script:
 	fi
 	echo "import os" >> bin/script.py
 	cat .qemu.yml | shyaml get-value script | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/script.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/script.py ; \
+		done \
+	done
 
 after_success:
 	if [ -d bin/after_success.py ] ; then \
@@ -85,3 +103,8 @@ after_success:
 	fi
 	echo "import os" >> bin/after_success.py
 	cat .qemu.yml | shyaml get-value after_success | sed -E 's|-\s(.+)|os.system("\1")|g' >> bin/after_success.py
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j python /usr/local/bin/after_success.py ; \
+		done \
+	done

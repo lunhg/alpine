@@ -11,7 +11,7 @@ env:
 
 before_install:
   - apt-get install python
-  - pip intall shyaml
+  - pip install shyaml
   - adduser -G wheel -D -h /home/$USER $USER
   - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
   - chown -R $USER: /home/$USER
@@ -32,12 +32,12 @@ before_script:
   
 script:
   - cd /home/$USER/qemu
-  - docker-compose up -d qemu
-  - docker-compose ps qemu
-  - docker-compose logs qemu
+  - docker-compose up -d alpine
+  - docker-compose ps alpine
+  - docker-compose logs alpine
   
 after_success:
   - cd /home/$USER/qemu
   - docker login -u $$DOCKER_USERNAME -p $$DOCKER_PASSWORD
-  - docker-compose push qemu
+  - docker-compose push alpine
   
