@@ -14,7 +14,7 @@ before_install:
   - make build
   - make env
   - make before_install
-  - 
+  
 before_script:
   - make install
   - make after_install
