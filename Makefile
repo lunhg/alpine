@@ -2,20 +2,21 @@ USER={USER:=$$USER}
 NAME=$$(cat /proc/sys/kernel/random/uuid)
 docker:
 	mkdir -p bin
-	@docker run --rm \
-							--privileged \
-							multiarch/qemu-user-static:register \
-							--reset
-	@docker service create \
-		--mount 'type=volume,src=$$HOME/bin,dst=/usr/local/bin,volume-driver=local' \
-		--name $$NAME
+	@docker run --rm --privileged -t multiarch/qemu-user-static:register --reset
+	@docker service create --mount 'type=volume,src=$$HOME/bin,dst=/usr/local/bin,volume-driver=local' --name $$NAME
+	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j uname -a ; \
+		done \
+	done
 
 build:
 	sudo pip install shyaml
 	mkdir -p bin
 	for i in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
-			docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j sudo apt-get install python ; \
+			for k in `cat .qemu.yml | shyaml get-value apt | sed -E 's|-\s(.+)|\1|g'` ; do \
+				docker run --name=$$NAME --user=$$(id -u):$$(id -g) -t multiarch/debian-debootstrap:$$i-$$j sudo apt-get install $$k; \
 		done \
 	done
 
