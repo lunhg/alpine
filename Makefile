@@ -15,7 +15,7 @@ build:
 			for k in `cat .qemu.yml | shyaml get-value apt | sed -E 's|-\s(.+)|\1|g'` ; do \
 				docker run --name qemu --user=$$(id -u):$$(id -g) -v $$PWD/bin:/usr/local/bin -t multiarch/debian-debootstrap:$$i-$$j sudo apt-get install $$k; \
 			for k in `cat .qemu.yml | shyaml get-value pip | sed -E 's|-\s(.+)|\1|g'` ; do \
-				docker run --user=$$(id -u):$$(id -g) -v $$PWD/bin:/usr/local/bin -t multiarch/debian-debootstrap:$$i-$$j sudo pip install $$k; \
+				docker run --user=$$(id -u):$$(id -g) -v $$PWD/bin:/usr/local/bin -t multiarch/debian-debootstrap:$$i-$$j sudo pip install $$k ; \
 		done \
 	done
 
