@@ -1,5 +1,4 @@
 USER={USER:=$$USER}
-<<<<<<< HEAD
 ARCHES=""
 TARGETS=""
 clean:
