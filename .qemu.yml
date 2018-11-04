@@ -1,3 +1,5 @@
+image: multiarch/debootstrap
+
 arches:
   - armhf
   - arm64
@@ -5,26 +7,19 @@ arches:
 targets:
   - jessie
 
-apt:
-  - git
-  - curl
-  - python
-  - python-pip
-
-pip:
-  - shyaml
-
 env:
-  - DOCKER-VERSION=18.03
+  - DOCKER_VERSION=18.06
   - DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
+  - uname -a
+  - apt-get install git curl python python-pip
+  - pip install shyaml
   - adduser -G wheel -D -h /home/$USER $USER
   - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
   - chown -R $USER: /home/$USER
     
 install:
-  - echo $PWD | su - $USER
   - curl https://releases.rancher.com/install-docker/$DOCKER_VERSION.sh | sh > /home/$USER/bin/docker
   - curl -L https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m` > /home/$USER/bin/docker-compose
     
