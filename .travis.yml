@@ -28,7 +28,7 @@ after_script:
   - make after_script
 
 after_success:
-  - echo "DONE!"
+  - make after_success
 
 # don't notify me when things fail
 notifications:
