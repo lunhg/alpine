@@ -1,4 +1,4 @@
-image: multiarch/debootstrap
+image: multiarch/debian-debootstrap
 
 arches:
   - armhf
@@ -7,42 +7,32 @@ arches:
 targets:
   - jessie
 
-pip:
-  - shyaml
-
 env:
   - DOCKER_VERSION=18.06
   - DOCKER_COMPOSE_VERSION=1.22.0
 
 before_install:
-  - uname -a
+  - echo "==> Welcome to redelivre/qemu"
+  - echo "$(whoami) at $(pwd) on $(uname -a)"
   - apt-get install git curl python python-pip
-  - pip install shyaml
-  - adduser -G wheel -D -h /home/$USER $USER
-  - echo "%wheel ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-  - chown -R $USER: /home/$USER
     
 install:
-  - curl https://releases.rancher.com/install-docker/$DOCKER_VERSION.sh | sh > /home/$USER/bin/docker
-  - curl -L https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m` > /home/$USER/bin/docker-compose
+  - curl https://releases.rancher.com/install-docker/$DOCKER_VERSION.sh | sh > /home/$username/bin/docker
+  - curl -L https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-`uname -s`-`uname -m` > /home/$username/bin/docker-compose
     
 after_install:
-  - chmod +x /home/$USER/bin/docker
-  - chmod +x /home/$USER/bin/docker-compose
-  - apt-get install sudo git python curl
-  - export PATH=$$PATH:/home/$USER/bin
+  - chmod +x /home/$username/bin/docker
+  - chmod +x /home/$username/bin/docker-compose
 
 before_script:
-  - git clone --branch=$$QEMU_ARCHES https://www.github.com/lunhg/alpine /home/$USER/alpine
+  - git clone --branch=aarch64 https://www.github.com/lunhg/alpine /home/$username/alpine
   
 script:
-  - cd /home/$USER/qemu
-  - docker-compose up -d alpine
-  - docker-compose ps alpine
-  - docker-compose logs alpine
+  - docker-compose --project-directory=/home/$username/alpine -d alpine
+  - docker-compose --project-directory=/home/$username/alpine ps alpine
+  - docker-compose --project-directory=/home/$username/alpine logs alpine
   
-after_success:
-  - cd /home/$USER/qemu
-  - docker login -u $$DOCKER_USERNAME -p $$DOCKER_PASSWORD
-  - docker-compose push alpine
+after_script:
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - docker-compose --project-directory=/home/$username/alpine push alpine
   

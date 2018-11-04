@@ -8,21 +8,27 @@ dist: trusty
 cache:
   directories:
     - $HOME/qemu
-  
+
 before_install:
-  - make build
   - make before_install
   
-before_script:
+install:
   - make install
+
+after_install:
   - make after_install
 
-script:
+before_script:
   - make before_script
+
+script:
   - make script
 
+after_script:
+  - make after_script
+
 after_success:
-  - make after_success
+  - echo "DONE!"
 
 # don't notify me when things fail
 notifications:
