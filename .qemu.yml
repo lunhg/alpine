@@ -7,6 +7,9 @@ arches:
 targets:
   - jessie
 
+pip:
+  - shyaml
+
 env:
   - DOCKER_VERSION=18.06
   - DOCKER_COMPOSE_VERSION=1.22.0

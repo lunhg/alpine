@@ -8,7 +8,7 @@ dist: trusty
 cache:
   directories:
     - $HOME/qemu
-
+  
 before_install:
   - make build
   - make before_install

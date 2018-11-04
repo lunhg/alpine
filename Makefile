@@ -6,24 +6,28 @@ clean:
 		rm -rf $$PWD/bin ; \
 	fi
 
-build: clean
-	pip install shyaml
+install: clean
+	pip install --user -U pip
+	pip install --user shyaml
 	export QEMU_ARCHES=`cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'`
 	export QEMU_TARGETS=`cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'`
 	export QEMU_ENVS=`cat .qemu.yml | shyaml get-value env | sed -E 's|-\s(.+)|\1|g'`
-	@docker run --rm --privileged --name qemu -v -ti multiarch/qemu-user-static:register --reset
+	export QEMU_NAME=`cat /proc/sys/kernel/random/uuid`
+
+after_install:
+	@docker run --rm --privileged --name $$QEMU_NAME -v -ti multiarch/qemu-user-static:register --reset
 
 %:
-	for i in $$TARGETS; do \
+	for i in $$QEMU_TARGETS; do \
 		rm -rf bin/$$i \
-		for j in $$ARCHES ; do \
+		for j in $$QEMU_ARCHES ; do \
 			mkdir -p bin/$$i \
 			mkdir -p bin/$$i/$$j \
 			echo "FROM multiarch/debian-debootstrap-$$i-$$j" >> bin/$$i/$$j/Dockerfile \
 			for line in "version: '2'" \
 			    "  services:" \
 					"    $$i_$$j:" \
-				  "      image: redelivre/debian-qemu:$$i-$$j" \
+				  "      image: redelivre/qemu:$$i-$$j" \
 				  "      build:" \
 					"        context: $$PWD/bin/$$i/$$j" \
 					"        dockerfile: Dockerfile" \
