@@ -26,6 +26,6 @@ after_success:
   - make after_success
 
 # don't notify me when things fail
-notification
-s:
-  email: false
+notifications:
+  email:
+    false
