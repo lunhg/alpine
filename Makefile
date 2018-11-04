@@ -1,4 +1,5 @@
 USER={USER:=$$USER}
+<<<<<<< HEAD
 ARCHES=""
 TARGETS=""
 clean:
@@ -20,7 +21,7 @@ build: clean
 			echo "FROM multiarch/debian-debootstrap-$$i-$$j" >> bin/$$i/$$j/Dockerfile
 			for line in "version: '2'" \
 			    "  services:" \
-					"    qemu_$$i_$$j:" \
+					"    $$i_$$j:" \
 				  "      image: redelivre/debian-qemu:$$i-$$j" \
 				  "      build:" \
 					"        context: $$PWD/bin/$$i/$$j" \
@@ -34,6 +35,7 @@ build: clean
 					done \
 				done \
 			done \
-			cat .qemu.yml | shyaml get-value $@ | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile
-		done \
+			cat .qemu.yml | shyaml get-value $@ | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile \
+			docker-compose up -d $$i_$$j ; \
+		done /
 	done
