@@ -10,22 +10,22 @@ cache:
     - $HOME/qemu
 
 before_install:
-  - make docker
   - make build
-  - make env
+  - make docker
   - make before_install
   
 before_script:
   - make install
   - make after_install
-  - make before_script
 
 script:
+  - make before_script
   - make script
 
 after_success:
   - make after_success
 
 # don't notify me when things fail
-notifications:
+notification
+s:
   email: false
