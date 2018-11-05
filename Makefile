@@ -25,19 +25,21 @@ before_script:
 			echo "ARG username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'` >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
 			echo "    build:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      context: $$PWD/bin/$$i/$$j" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      dockerfile: Dockerfile" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      args:" >> $$PWD/bin/$$i/docker-compose.yml ; \
-			echo "        - 'username=$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_USERNAME=\$$DOCKER_USERNAME'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
+			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'` >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'` >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN add group --gid 1000 wheel && adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/docker-compose.yml ; \
 		done ; \
 	done
 
