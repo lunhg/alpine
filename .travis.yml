@@ -25,12 +25,6 @@ before_script:
 script:
   - make script
 
-after_script:
-  - make after_script
-
-after_success:
-  - make after_success
-
 # don't notify me when things fail
 notifications:
   email: false

@@ -48,12 +48,10 @@ script:
 					"install" \
 					"after_install" \
 					"before_script" \
-					"script" \
-					"after_script" \
-					"after_success" ; do \
+					"script" ; do \
 					echo "RUN echo '==> redelivre/qemu:"$$i"-"$$j"."$$k"'" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 					cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-					if [ $$k == 'before_install' ] ; then \
+					if [ "$$k" == 'before_install' ] ; then \
 						echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 						echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 					fi ; \

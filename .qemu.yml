@@ -47,8 +47,6 @@ script:
 after_script:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker-compose --project-directory=/home/$username/alpine push alpine
-  
-after_success:
   - docker-compose --project-directory=/home/$username/alpine ps alpine
   - docker-compose --project-directory=/home/$username/alpine logs alpine
   - echo "y" | docker-compose system prune -a
