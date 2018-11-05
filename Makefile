@@ -26,7 +26,7 @@ before_script:
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'`" > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'` >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
 			echo "    build:" >> $$PWD/bin/$$i/docker-compose.yml ; \
