@@ -37,7 +37,7 @@ before_script:
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'` >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN add group --gid 1000 wheel && adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN addgroup --gid 1000 wheel && adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 		done ; \
 	done
 
