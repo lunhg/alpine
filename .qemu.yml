@@ -26,6 +26,7 @@ apt:
 
 before_install:
   - uname -a && whoami
+  - addgroup --gid 1000 wheel
   - echo `adduser --ingroup wheel --disabled-password --home /home/$username $username`
   - echo '%wheel (ALL:ALL) NOPASSWD:ALL' > /etc/sudoers
 
