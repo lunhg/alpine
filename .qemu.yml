@@ -8,29 +8,35 @@ targets:
   - jessie
 
 env:
+  - REPO=lunhg/alpine
+  - BRANCH=aarch64
   - DOCKER_DOWNLOAD=https://releases.rancher.com/install-docker
   - DOCKER_VERSION=18.06
-  - DOCKER_BIN=/home/$username/$username/bin/docker
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
-  - DOCKER_COMPOSE_VERSION=1.22.0
-  - DOCKER_COMPOSE_BIN=/home/$username/bin/docker-compose
+  - DOCKER_COMPOSE_VERSION=1.23.1
 
 before_install:
-  - echo "==> Welcome to redelivre/qemu-"`uname -m`
-  - echo "$(whoami) at $(pwd) on $(uname -a)"
-  - apt-get install git curl python python-pip
-  - export DOCKER_COMPOSE_ARCH="docker-compose-"`uname -s`"-"`uname -m`
+  - uname -a
+  - whoami
+  - hostname
+  - pwd
+  - apt-get update
+  - echo "y" | apt-get install git curl python python-pip
 
 install:
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh -o $DOCKER_BIN
-  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/$DOCKER_COMPOSE_ARCH -o $DOCKER_COMPOSE_BIN
+  - whoami
+  - pwd
+  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/$username/bin/docker
+  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/$username/bin/docker-compose
     
 after_install:
   - chmod +x /home/$username/bin/docker
   - chmod +x /home/$username/bin/docker-compose
+  - export PATH=$PATH:/home/$username/bin
 
 before_script:
-  - git clone --branch=aarch64 https://www.github.com/lunhg/alpine /home/$username/alpine
+  - echo $REPO | sed -E 's|(.+)/(.+)|/home/\$$username/\1|g' | mkdir 
+  - git clone --branch=$BRANCH https://www.github.com/$REPO /home/$username/$REPO
   
 script:
   - docker-compose --project-directory=/home/$username/alpine -d --build
@@ -42,4 +48,5 @@ after_script:
 after_success:
   - docker-compose --project-directory=/home/$username/alpine ps alpine
   - docker-compose --project-directory=/home/$username/alpine logs alpine
+  - echo "y" | docker-compose system prune -a
   

@@ -19,10 +19,8 @@ before_script:
 	mkdir -p $$PWD/bin
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		mkdir -p $$PWD/bin/$$i ; \
-		for k in "version: '2'" \
-				"services:" ; do \
-				echo -e $$k >> $$PWD/bin/docker-compose.yml ; \
-		done ; \
+		echo "version: '2'" >> $$PWD/bin/docker-compose.yml ; \
+		echo "services:" >> $$PWD/bin/docker-compose.yml ; \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			mkdir -p $$PWD/bin/$$i/$$j ; \
 			echo "FROM "`cat .qemu.yml | shyaml get-value image`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
@@ -53,7 +51,12 @@ script:
 					"script" \
 					"after_script" \
 					"after_success" ; do \
+					echo "RUN echo '==> redelivre/qemu:"$$i"-"$$j"."$$k"'" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 					cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
+					if [ $$k == 'before_install' ] ; then \
+						echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+						echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+					fi ; \
 			done \
 		done \
 	done
