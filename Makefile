@@ -13,7 +13,7 @@ install:before_install
 	pip install --user shyaml
 
 after_install:
-	docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 before_script:
 	mkdir -p $$PWD/bin
@@ -66,6 +66,6 @@ after_script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			cat $$PWD/bin/$$i/$$j/Dockerfile ; \
-			docker-compose --file=$$PWD/bin/docker-compose.yml up -d ""$$i"_"$$j ; \
+			docker-compose --file=$$PWD/bin/docker-compose.yml build ""$$i"_"$$j ; \
 		done \
 	done \

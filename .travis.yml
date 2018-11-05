@@ -10,6 +10,7 @@ cache:
     - $HOME/qemu
 
 before_install:
+  - make clean
   - make before_install
   
 install:

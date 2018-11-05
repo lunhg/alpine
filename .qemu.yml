@@ -1,6 +1,9 @@
 image: multiarch/debian-debootstrap
 
 arches:
+  - i386
+  - x86_64
+  - armel
   - armhf
   - arm64
 
@@ -21,7 +24,7 @@ before_install:
   - hostname
   - pwd
   - apt-get update
-  - echo "y" | apt-get install git curl python python-pip
+  - apt-get -y install git curl python python-pip
 
 install:
   - whoami
