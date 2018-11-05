@@ -26,7 +26,7 @@ apt:
 
 before_install:
   - uname -a && whoami
-  - adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username $username
+  - echo $username | adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username
   - echo '%wheel (ALL:ALL) NOPASSWD:ALL' > /etc/sudoers
 
 install:
