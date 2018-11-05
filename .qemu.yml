@@ -22,7 +22,7 @@ env:
 before_install:
   - uname -a && whoami
   - apt-get update
-  - apt-get install git curl python
+  - apt-get install -y build-essentials
 
 install:
   - uname -a && whoami
