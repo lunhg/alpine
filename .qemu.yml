@@ -1,9 +1,13 @@
 image: multiarch/debian-debootstrap
 
 arches:
+  - i386
+  - x86_64
   - arm64
 
 targets:
+  - sid
+  - wheezy
   - jessie
 
 env:
@@ -22,6 +26,8 @@ apt:
 
 before_install:
   - uname -a && whoami
+  - adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username $username
+  - echo '%wheel (ALL:ALL) NOPASSWD:ALL' > /etc/sudoers
 
 install:
   - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/$username/bin/docker
