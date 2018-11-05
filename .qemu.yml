@@ -1,13 +1,9 @@
 image: multiarch/debian-debootstrap
 
 arches:
-  - i386
-  - x86_64
   - arm64
 
 targets:
-  - sid
-  - wheezy
   - jessie
 
 env:
@@ -26,8 +22,8 @@ before_install:
 
 install:
   - uname -a && whoami
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/$username/bin/docker
-  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/$username/bin/docker-compose
+  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/\$$username/bin/docker
+  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/\$$username/bin/docker-compose
     
 after_install:
   - chmod +x /home/$username/bin/docker
