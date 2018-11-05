@@ -11,6 +11,7 @@ before_install:
 install:before_install
 	pip install --user -U pip
 	pip install --user shyaml
+	docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 before_script:
 	mkdir -p $$PWD/bin
@@ -64,3 +65,5 @@ after_script:
 			docker-compose --file=$$PWD/bin/docker-compose.yml build ""$$i"_"$$j ; \
 		done \
 	done \
+
+all: clean before_install install before_script script after_script

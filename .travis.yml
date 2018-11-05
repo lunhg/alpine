@@ -8,22 +8,10 @@ dist: trusty
 cache:
   directories:
     - $HOME/qemu
-
-before_install:
-  - make clean
-  - make before_install
-  
-install:
-  - make install
-
-after_install:
-  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-
-before_script:
-  - make before_script
+    - $HOME/bin
 
 script:
-  - make script
+  - make all
 
 # don't notify me when things fail
 notifications:
