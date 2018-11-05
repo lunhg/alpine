@@ -14,15 +14,14 @@ env:
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
   - DOCKER_COMPOSE_VERSION=1.23.1
 
-before_install:
-  - apt-get update
-  - apt-get -y install sudo git curl python python-pip
-  - adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username $username
-  - echo "%wheel (ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
+apt:
+  - sudo
+  - git
+  - curl
+  - python
 
 install:
-  - whoami
-  - pwd
+  - uname -a && whoami
   - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/$username/bin/docker
   - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/$username/bin/docker-compose
     
