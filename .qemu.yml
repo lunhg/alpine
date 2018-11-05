@@ -43,8 +43,6 @@ before_script:
   
 script:
   - docker-compose --project-directory=/home/$username/alpine -d --build
-
-after_script:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker-compose --project-directory=/home/$username/alpine push alpine
   - docker-compose --project-directory=/home/$username/alpine ps alpine

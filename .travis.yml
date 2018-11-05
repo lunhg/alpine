@@ -17,7 +17,7 @@ install:
   - make install
 
 after_install:
-  - make after_install
+  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 before_script:
   - make before_script

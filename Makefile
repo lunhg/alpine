@@ -12,9 +12,6 @@ install:before_install
 	pip install --user -U pip
 	pip install --user shyaml
 
-after_install:
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-
 before_script:
 	mkdir -p $$PWD/bin
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
