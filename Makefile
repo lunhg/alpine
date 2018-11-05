@@ -42,17 +42,13 @@ before_script:
 script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
-			for k in "before_install" \
-					"install" \
-					"after_install" \
-					"before_script" \
-					"script" ; do \
-					echo "RUN echo '==> redelivre/qemu:"$$i"-"$$j"."$$k"'" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-					cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-					if [ "$$k" == 'before_install' ] ; then \
-						echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-						echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-					fi ; \
+			cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|RUN\1|g' >> bin/$$i/$$j/Dockerfile ; \
+			echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			done \
 		done \
 	done
