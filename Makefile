@@ -19,7 +19,6 @@ before_script:
 		mkdir -p $$PWD/bin/$$i ; \
 		echo "version: '2'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 		echo "services:" >> $$PWD/bin/$$i/docker-compose.yml ; \
-		fi ; \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			mkdir -p $$PWD/bin/$$i/$$j ; \
 			echo "FROM "`cat .qemu.yml | shyaml get-value image`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
