@@ -20,7 +20,7 @@ before_script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		mkdir -p $$PWD/bin/$$i ; \
 		for k in "version: '2'" \
-				"\tservices:" ; do \
+				"services:" ; do \
 				echo -e $$k >> $$PWD/bin/docker-compose.yml ; \
 		done ; \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
@@ -29,19 +29,17 @@ before_script:
 			echo "ARG username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			for k in "\t\t"$$i"_"$$j":" \
-					"\t\t\timage: redelivre/qemu:$$i-$$j" \
-					"\t\t\tbuild:" \
-					"\t\t\t\tcontext: $$PWD/$$i/$$j" \
-					"\t\t\t\tdockerfile: Dockerfile" \
-					"\t\t\t\targs:" \
-					"\t\t\t\t\t- 'username=$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)'" \
-					"\t\t\t\t\t- 'DOCKER_USERNAME=\$$DOCKER_USERNAME'" \
-					"\t\t\t\t\t- 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" ; do \
-					echo -e $$k >> $$PWD/bin/docker-compose.yml ; \
-			done ; \
+			echo "  "$$i"_"$$j":" >> $$PWD/bin/docker-compose.yml ; \
+			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
+			echo "    build:" >> $$PWD/bin/docker-compose.yml ; \
+			echo "      context: $$PWD/bin/$$i/$$j" >> $$PWD/bin/docker-compose.yml ; \
+			echo "      dockerfile: Dockerfile" >> $$PWD/bin/docker-compose.yml ; \
+			echo "      args:" >> $$PWD/bin/docker-compose.yml ; \
+			echo "        - 'username=$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)'" >> $$PWD/bin/docker-compose.yml ; \
+			echo "        - 'DOCKER_USERNAME=\$$DOCKER_USERNAME'" >> $$PWD/bin/docker-compose.yml ; \
+			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|\t\t\t\t\t- "\1=\2"|g' >> $$PWD/bin/docker-compose.yml ; \
+			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/docker-compose.yml ; \
 		done ; \
 	done
 
@@ -61,9 +59,10 @@ script:
 	done
 
 after_script:
+	cat $$PWD/bin/docker-compose.yml
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
-			echo $$i"_"$$j ; \
-			docker-compose up -d --build --project-directory $$PWD/bin $$i"_"$$j ; \
+			cat $$PWD/bin/$$i/$$j/Dockerfile ; \
+			docker-compose --file=$$PWD/bin/docker-compose.yml up -d ""$$i"_"$$j ; \
 		done \
-	done
+	done \
