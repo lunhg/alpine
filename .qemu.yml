@@ -18,14 +18,11 @@ env:
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
   - DOCKER_COMPOSE_VERSION=1.23.1
 
-apt:
-  - sudo
-  - git
-  - curl
-  - python
 
 before_install:
   - uname -a && whoami
+  - apt-get update
+  - apt-get install git curl python
 
 install:
   - uname -a && whoami
