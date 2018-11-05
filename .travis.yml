@@ -11,7 +11,7 @@ cache:
     - $HOME/bin
 
 script:
-  - make all
+  - make qemu-composer
 
 # don't notify me when things fail
 notifications:

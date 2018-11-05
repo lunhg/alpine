@@ -42,7 +42,7 @@ before_script:
 script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
-			cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|RUN\1|g' >> bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
@@ -61,4 +61,4 @@ after_script:
 		done \
 	done \
 
-all: clean before_install install before_script script after_script
+qemu-composer: clean before_install install before_script script after_script
