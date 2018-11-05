@@ -20,8 +20,10 @@ apt:
   - curl
   - python
 
-install:
+before_install:
   - uname -a && whoami
+
+install:
   - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/$username/bin/docker
   - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/$username/bin/docker-compose
     

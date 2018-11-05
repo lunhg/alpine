@@ -27,7 +27,7 @@ before_script:
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username $username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN echo '%wheel (ALL:ALL) NOPASSWD:ALL' > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN apt-get update" >>  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN apt-get update" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN apt-get install"`cat .qemu.yml | shyaml get-value apt | sed 's|-\s(.+)|\1|g'`" > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
