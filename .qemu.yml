@@ -4,8 +4,10 @@ arches:
   - i386
   - x86_64
   - armel
+  - armeb
   - armhf
   - arm64
+  - aarch64_be
 
 targets:
   - jessie

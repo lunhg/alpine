@@ -49,7 +49,6 @@ script:
 			cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			done \
 		done \
 	done
 
