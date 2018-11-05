@@ -1,20 +1,10 @@
 image: multiarch/debian-debootstrap
 
 arches:
-  - i386
-  - x86_64
-  - armel
-  - armeb
-  - armhf
   - arm64
-  - aarch64_be
 
 targets:
   - jessie
-  - wheezy
-  - buster
-  - stretch
-  - sid
 
 env:
   - REPO=lunhg/alpine
@@ -27,7 +17,7 @@ env:
 before_install:
   - apt-get update
   - apt-get -y install sudo git curl python python-pip
-  - adduser --group wheel --disabled-password --home /home/$username $username
+  - adduser --debug --ingroup wheel --gecos --disabled-password --home /home/$username $username
   - echo "%wheel (ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
 
 install:
