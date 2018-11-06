@@ -17,25 +17,28 @@ env:
 
 # User is root
 before_install:
-  - uname -a
+  - echo "before_install: $(whoami) on $PWD at $(uname -a)"
   - apt-get update
   - apt-get install -y git curl python
 
 # User isnt root on this point
 install:
-  - echo `whoami` at `pwd`
+  - echo "install: $(whoami) on $PWD at $(uname -a)"
   - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker
   - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
     
 after_install:
+  - echo "after_install: $(whoami) on $PWD at $(uname -a)"
   - for i in "docker" "docker-compose" ; do chmod +x $HOME/bin/$i ; done
   - export PATH=$PATH:$HOME/bin
 
 before_script:
+  - echo "before_script: $(whoami) on $PWD at $(uname -a)"
   - echo $REPO | sed -E 's|(.+)/(.+)|$HOME/\1|g' | mkdir
   - git clone --branch=$BRANCH $GITHUB/$REPO $HOME/$REPO
 
 script:
+  - echo "script: $(whoami) on $PWD at $(uname -a)"
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker-compose up --project-directory=$HOME/$REPO
   - docker-compose ps --project-directory=$HOME/$REPO
