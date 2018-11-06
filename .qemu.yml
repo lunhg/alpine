@@ -15,27 +15,22 @@ env:
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
   - DOCKER_COMPOSE_VERSION=1.23.1
 
-
 before_install:
-  - echo "before_install: `whoami` at `uname -a`"
   - apt-get update
   - apt-get install -y git curl make python
 
 install:
-  - echo "install: `whoami` at `uname -a`"
   - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker \
     && curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
     
 after_install:
-  - echo "after_install: `whoami` at `uname -a`"
   - for i in "docker" "docker-compose" ; do chmod +x $HOME/bin/$$i ; done
   - export PATH=$PATH:$HOME/bin
 
 before_script:
-  - echo "before_script: `whoami` at `uname -a`"
   - echo $REPO | sed -E 's|(.+)/(.+)|$HOME/\1|g' | mkdir
   - git clone --branch=$BRANCH $GITHUB/$REPO $HOME/$REPO
-  
+
 script:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - for i in "up" "ps" "logs" "push" ; do docker-compose $$i --project-directory=$HOME/alpine ; done
