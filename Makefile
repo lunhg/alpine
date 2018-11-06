@@ -46,11 +46,11 @@ script:
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			for k in `cat .qemu.yml | shyaml keys | grep "[^image|targets|arches|env]"` ; do \
 				cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g'  >> bin/$$i/$$j/Dockerfile ; \
-			done ; \
-			if [ "$$k" = "before_install" ] ; then \
+				if [ "$$k" = "before_install" ] ; then \
 					echo "WORKDIR /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> bin/$$i/$$j/Dockerfile ; \
 					echo "USER $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> bin/$$i/$$j/Dockerfile ; \
 				fi ; \
+			done ; \
 		done ; \
 	done ;
 
