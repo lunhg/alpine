@@ -17,23 +17,37 @@ before_script:
 	mkdir -p $$PWD/bin
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		mkdir -p $$PWD/bin/$$i ; \
+		# docker-compose composition 
 		echo "version: '2'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 		echo "services:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			mkdir -p $$PWD/bin/$$i/$$j ; \
+
+			# Dockerfile env as arguments composition
 			echo "FROM "`cat .qemu.yml | shyaml get-value image`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+
+			# docker-compose composition
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
 			echo "    build:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      context: $$PWD/bin/$$i/$$j" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      dockerfile: Dockerfile" >> $$PWD/bin/$$i/docker-compose.yml ; \
+
+			# docker-compose env as arguments composition
 			echo "      args:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_USERNAME=\$$DOCKER_USERNAME'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
+
+			# Volumes composition
+			echo "    volumes:" >> $$PWD/bin/$$i/docker-compose.yml ; \
+			cat .qemu.yml | shyaml get-value volumes | sed -E 's|- (.+)=(.+)|VOLUME \2|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			cat .qemu.yml | shyaml get-value volumes | sed -E 's|- (.+)=(.+)|      - "\1"|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+
+			# Unique user
 			echo "RUN addgroup --gid 1000 qemu" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN echo 'y' | adduser --force-badname --ingroup qemu --uid 1000 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)"  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN echo '%qemu ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
