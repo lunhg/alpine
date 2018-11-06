@@ -11,43 +11,29 @@ before_install:
 install:before_install
 	pip install --user -U pip
 	pip install --user shyaml
-	docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	docker run `cat .qemu.yml | shyaml get-value qemu.register.run.options | sed -E 's|-\s(.+)|--\1|g'` `cat .qemu.yml | shyaml get-value qemu.register.name | sed -E 's|-\s(.+)|\1|g'` `cat .qemu.yml | shyaml get-value qemu.register.run.commands | sed -E 's|-\s(.+)|--\1|g'`
 
 before_script:
 	mkdir -p $$PWD/bin
-	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+	for i in `cat .qemu.yml | shyaml get-value qemu.image.targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		mkdir -p $$PWD/bin/$$i ; \
-		# docker-compose composition 
 		echo "version: '2'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 		echo "services:" >> $$PWD/bin/$$i/docker-compose.yml ; \
-		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value qemu.image.arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			mkdir -p $$PWD/bin/$$i/$$j ; \
-
-			# Dockerfile env as arguments composition
-			echo "FROM "`cat .qemu.yml | shyaml get-value image`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "FROM "`cat .qemu.yml | shyaml get-value qemu.image.name`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-
-			# docker-compose composition
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "    image: redelivre/qemu:$$i-$$j" >> $$PWD/bin/docker-compose.yml ; \
 			echo "    build:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      context: $$PWD/bin/$$i/$$j" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "      dockerfile: Dockerfile" >> $$PWD/bin/$$i/docker-compose.yml ; \
-
-			# docker-compose env as arguments composition
 			echo "      args:" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_USERNAME=\$$DOCKER_USERNAME'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
-
-			# Volumes composition
-			echo "    volumes:" >> $$PWD/bin/$$i/docker-compose.yml ; \
-			cat .qemu.yml | shyaml get-value volumes | sed -E 's|- (.+)=(.+)|VOLUME \2|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value volumes | sed -E 's|- (.+)=(.+)|      - "\1"|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-
-			# Unique user
 			echo "RUN addgroup --gid 1000 qemu" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN echo 'y' | adduser --force-badname --ingroup qemu --uid 1000 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)"  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "RUN echo '%qemu ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
@@ -56,9 +42,9 @@ before_script:
 	done ; 
 
 script:
-	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
-		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
-			for k in `cat .qemu.yml | shyaml keys | grep "[^image|targets|arches|env]"` ; do \
+	for i in `cat .qemu.yml | shyaml get-value qemu.image.targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value qemu.image.arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+			for k in `cat .qemu.yml | shyaml keys | grep "[^qemu|env]"` ; do \
 				cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g'  >> bin/$$i/$$j/Dockerfile ; \
 				if [ "$$k" = "before_install" ] ; then \
 					echo "WORKDIR /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> bin/$$i/$$j/Dockerfile ; \
@@ -69,9 +55,9 @@ script:
 	done ;
 
 after_script:
-	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
+	for i in `cat .qemu.yml | shyaml get-value qemu.image.targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		cat $$PWD/bin/$$i/docker-compose.yml ; \
-		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
+		for j in `cat .qemu.yml | shyaml get-value qemu.image.arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			cat $$PWD/bin/$$i/$$j/Dockerfile ; \
 			docker-compose --file=$$PWD/bin/$$i/docker-compose.yml build ""$$i"_"$$j ; \
 		done \

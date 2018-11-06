@@ -1,49 +1,60 @@
-image: multiarch/debian-debootstrap
+qemu:
+  register:
+    name: multiarch/qemu-user-static:register
+    run:
+      options:
+        - rm
+        - privileged
+      commands:
+        - reset
 
-arches:
-  - arm64
-
-targets:
-  - jessie
-
-volumes:
-  - $HOME/bin:$HOME/bin
+  image:
+    name: multiarch/debian-debootstrap
+    arches:
+      - arm64
+      - aarch64_be
+    targets:
+      - jessie
 
 env:
   - REPO=lunhg/alpine
   - BRANCH=aarch64
   - GITHUB=https://www.github.com
-  - DOCKER_DOWNLOAD=https://releases.rancher.com/install-docker
+  - DOCKER_DOWNLOAD= https://github.com/docker/compose/archive
   - DOCKER_VERSION=18.06
-  - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
+  - DOCKER_COMPOSE_DOWNLOAD=download
   - DOCKER_COMPOSE_VERSION=1.23.1
 
-# User is root
 before_install:
-  - echo "before_install:" && echo "==> user: $(whoami)" && echo "==> home: $HOST" && echo "==> os: $(uname -a)" && echo ==> "==> host: $(hostname)"
+  - echo "`whoami` a `uname -a` at `hostname`"
   - apt-get update
-  - apt-get install -y git curl python
+  - apt-get install -y git curl tar make python
 
 # User isnt root on this point
 install:
-  - echo "install:" && echo "==> user: $(whoami)" && echo "==> home: $HOST" && echo "==> os: $(uname -a)" && echo ==> "==> host: $(hostname)"
+  - echo "`whoami` running `uname -a` at `hostname`"
   - mkdir $HOME/bin
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker
+  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.tar.gz /tmp/docker-$DOCKER_VERSION.tar.gz
+  - tar -xvzf /tmp/docker-$DOCKER_VERSION.tar.gz
+  - chmod +x /tmp/docker-$DOCKER_VERSION/configure
+  - /tmp/docker-$DOCKER_VERSION/configure
+  - make --makefile=/tmp/docker-$DOCKER_VERSION/Makefile
+  - sudo make --makefile=/tmp/docker-$DOCKER_VERSION/Makefile install
   - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
     
 after_install:
-  - echo "after_install:" && echo "==> user: $(whoami)" && echo "==> home: $HOST" && echo "==> os: $(uname -a)" && echo ==> "==> host: $(hostname)"
+  - echo "`whoami` running `uname -a` at `hostname`"
   - for i in "docker" "docker-compose" ; do chmod +x $HOME/bin/$i ; done
   - export PATH=$PATH:$HOME/bin
 
 before_script:
-  - echo "before_script:" && echo "==> user: $(whoami)" && echo "==> home: $HOST" && echo "==> os: $(uname -a)" && echo ==> "==> host: $(hostname)"
+  - echo "`whoami` running `uname -a` at `hostname`"
   - echo $REPO | sed -E 's|(.+)/(.+)|$HOME/\1|g' | mkdir
   - git clone --branch=$BRANCH $GITHUB/$REPO $HOME/$REPO
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 script:
-  - echo "script:" && echo "==> user: $(whoami)" && echo "==> home: $HOST" && echo "==> os: $(uname -a)" && echo ==> "==> host: $(hostname)"
+  - echo "`whoami` running `uname -a` at `hostname`"
   - docker-compose up --project-directory=$HOME/$REPO
   - docker-compose ps --project-directory=$HOME/$REPO
   - docker-compose logs --project-directory=$HOME/$REPO
