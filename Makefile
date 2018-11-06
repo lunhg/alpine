@@ -34,10 +34,10 @@ before_script:
 			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
-			echo "RUN addgroup --gid 1000 wheel" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN mkdir /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN echo 'y' | adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)"  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "RUN chown -R $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id):wheel /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN addgroup --gid 1000 qemu" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN echo 'y' | adduser --force-badname --ingroup qemu --uid 1000 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)"  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN echo '%qemu ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN chown -R $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id):qemu /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 		done ; \
 	done ; 
 
