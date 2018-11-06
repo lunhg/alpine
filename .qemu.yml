@@ -9,6 +9,7 @@ targets:
 env:
   - REPO=lunhg/alpine
   - BRANCH=aarch64
+  - GITHUB=https://www.github.com
   - DOCKER_DOWNLOAD=https://releases.rancher.com/install-docker
   - DOCKER_VERSION=18.06
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
@@ -16,29 +17,29 @@ env:
 
 
 before_install:
-  - uname -a && whoami
-  - apt-get update
-  - apt-get install -y git curl make python
+  - echo "`whoami` at `uname -a`" \
+    && apt-get update \
+    && apt-get install -y git curl make python
 
 install:
-  - uname -a && whoami
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> /home/\$$username/bin/docker
-  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> /home/\$$username/bin/docker-compose
+  - echo "`whoami` at `uname -a`" \
+    && curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker \
+    && curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
     
 after_install:
-  - chmod +x /home/$username/bin/docker
-  - chmod +x /home/$username/bin/docker-compose
-  - export PATH=$PATH:/home/$username/bin
+  - for i in "docker" "docker-compose" ; \
+      chmod +x $HOME/bin/$$i ; \
+    done \
+    && export PATH=$PATH:$HOME/bin
 
 before_script:
-  - echo $REPO | sed -E 's|(.+)/(.+)|/home/\$$username/\1|g' | mkdir 
-  - git clone --branch=$BRANCH https://www.github.com/$REPO /home/$username/$REPO
-  
+  - echo $REPO | sed -E 's|(.+)/(.+)|$HOME/\1|g' | mkdir \
+    && git clone --branch=$BRANCH $GITHUB/$REPO $HOME/$REPO \
+    && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
 script:
-  - docker-compose --project-directory=/home/$username/alpine -d --build
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - docker-compose --project-directory=/home/$username/alpine push alpine
-  - docker-compose --project-directory=/home/$username/alpine ps alpine
-  - docker-compose --project-directory=/home/$username/alpine logs alpine
-  - echo "y" | docker-compose system prune -a
-  
+  - for "up" "ps" "logs" "push" ; do \
+      docker-compose up \
+        -d \
+        --project-directory $HOME/alpine ; \
+    done

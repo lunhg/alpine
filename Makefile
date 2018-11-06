@@ -22,7 +22,6 @@ before_script:
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			mkdir -p $$PWD/bin/$$i/$$j ; \
 			echo "FROM "`cat .qemu.yml | shyaml get-value image`":"$$j-$$i >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "ARG username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_USERNAME" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "ARG DOCKER_PASSWORD" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			echo "  "$$i"_"$$j":" >> $$PWD/bin/$$i/docker-compose.yml ; \
@@ -43,8 +42,8 @@ script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
 			cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			echo "WORKDIR /home/\$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "USER \$$username" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "WORKDIR /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "USER cat $$PWD/bin/.qemu.yml | shyaml get-value id" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
