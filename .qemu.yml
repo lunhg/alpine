@@ -15,16 +15,20 @@ env:
   - DOCKER_COMPOSE_DOWNLOAD= https://github.com/docker/compose/releases/download
   - DOCKER_COMPOSE_VERSION=1.23.1
 
+# User is root
 before_install:
+  - uname -a
   - apt-get update
-  - apt-get install -y git curl make python
+  - apt-get install -y git curl python
 
+# User isnt root on this point
 install:
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker \
-    && curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
+  - echo `whoami` at `pwd`
+  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.sh | sh >> $HOME/bin/docker
+  - curl -L $DOCKER_COMPOSE_DOWNLOAD/$DOCKER_COMPOSE_VERSION/run.sh | sh >> $HOME/bin/docker-compose
     
 after_install:
-  - for i in "docker" "docker-compose" ; do chmod +x $HOME/bin/$$i ; done
+  - for i in "docker" "docker-compose" ; do chmod +x $HOME/bin/$i ; done
   - export PATH=$PATH:$HOME/bin
 
 before_script:
@@ -33,4 +37,7 @@ before_script:
 
 script:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - for i in "up" "ps" "logs" "push" ; do docker-compose $$i --project-directory=$HOME/alpine ; done
+  - docker-compose up --project-directory=$HOME/$REPO
+  - docker-compose ps --project-directory=$HOME/$REPO
+  - docker-compose logs --project-directory=$HOME/$REPO
+  - docker-compose push --project-directory=$HOME/$REPO

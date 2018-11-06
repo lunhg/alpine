@@ -34,22 +34,25 @@ before_script:
 			echo "        - 'DOCKER_PASSWORD=\$$DOCKER_PASSWORD'" >> $$PWD/bin/$$i/docker-compose.yml ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|ARG \1|g' >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 			cat .qemu.yml | shyaml get-value env | sed -E 's|- (.+)=(.+)|        - "\1=\2"|g' >> $$PWD/bin/$$i/docker-compose.yml ; \
-			echo "RUN addgroup --gid 1000 wheel && adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN addgroup --gid 1000 wheel" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN mkdir /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN adduser --force-badname --ingroup wheel --uid 1001 --disabled-password --home /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id) $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)"  >> $$PWD/bin/$$i/$$j/Dockerfile ; \
+			echo "RUN chown -R $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id):wheel /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
 		done ; \
-	done
+	done ; 
 
 script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
 		for j in `cat .qemu.yml | shyaml get-value arches | sed -E 's|-\s(.+)|\1|g'` ; do \
-			cat .qemu.yml | shyaml get-value before_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			echo "WORKDIR /home/$$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			echo "USER cat $$PWD/bin/.qemu.yml | shyaml get-value id" >> $$PWD/bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value after_install | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value before_script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-			cat .qemu.yml | shyaml get-value script | sed -E 's|-\s(.+)|RUN \1|g' >> bin/$$i/$$j/Dockerfile ; \
-		done \
-	done
+			for k in `cat .qemu.yml | shyaml keys | grep "[^image|targets|arches|env]"` ; do \
+				if [ "$$k" == "before_install" ] ; then \
+					echo "WORKDIR $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> bin/$$i/$$j/Dockerfile ; \
+					echo "USER $$(cat $$PWD/bin/.qemu.yml | shyaml get-value id)" >> bin/$$i/$$j/Dockerfile ; \
+				fi ; \
+				cat .qemu.yml | shyaml get-value $$k | sed -E 's|-\s(.+)|RUN \1|g'  >> bin/$$i/$$j/Dockerfile ; \
+			done ; \
+		done ; \
+	done ;
 
 after_script:
 	for i in `cat .qemu.yml | shyaml get-value targets | sed -E 's|-\s(.+)|\1|g'` ; do \
@@ -60,4 +63,4 @@ after_script:
 		done \
 	done \
 
-qemu-composer: clean before_install install before_script script after_script
+qemu-composer: clean before_install before_script script after_script
