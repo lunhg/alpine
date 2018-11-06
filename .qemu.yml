@@ -12,7 +12,6 @@ qemu:
     name: multiarch/debian-debootstrap
     arches:
       - arm64
-      - aarch64_be
     targets:
       - jessie
 
@@ -26,7 +25,7 @@ env:
   - DOCKER_COMPOSE_VERSION=1.23.1
 
 before_install:
-  - echo "`whoami` a `uname -a` at `hostname`"
+  - echo "`whoami` running `uname -a` at `hostname`"
   - apt-get update
   - apt-get install -y git curl tar make python
 
@@ -34,7 +33,7 @@ before_install:
 install:
   - echo "`whoami` running `uname -a` at `hostname`"
   - mkdir $HOME/bin
-  - curl $DOCKER_DOWNLOAD/$DOCKER_VERSION.tar.gz /tmp/docker-$DOCKER_VERSION.tar.gz
+  - curl -L $DOCKER_DOWNLOAD/$DOCKER_VERSION.tar.gz /tmp/docker-$DOCKER_VERSION.tar.gz
   - tar -xvzf /tmp/docker-$DOCKER_VERSION.tar.gz
   - chmod +x /tmp/docker-$DOCKER_VERSION/configure
   - /tmp/docker-$DOCKER_VERSION/configure
@@ -62,3 +61,4 @@ script:
 after_script:
   - echo "after_script: $(whoami) on $PWD at $(uname -a)"
   - docker-compose push --project-directory=$HOME/$REPO
+  - docker system prune -a
