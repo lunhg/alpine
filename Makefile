@@ -63,4 +63,4 @@ after_script:
 		done \
 	done \
 
-qemu-composer: clean before_install before_script script after_script
+qemu-composer: clean before_install install before_script script after_script

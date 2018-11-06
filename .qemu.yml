@@ -36,11 +36,14 @@ before_script:
   - echo "before_script: $(whoami) on $PWD at $(uname -a)"
   - echo $REPO | sed -E 's|(.+)/(.+)|$HOME/\1|g' | mkdir
   - git clone --branch=$BRANCH $GITHUB/$REPO $HOME/$REPO
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 script:
   - echo "script: $(whoami) on $PWD at $(uname -a)"
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker-compose up --project-directory=$HOME/$REPO
   - docker-compose ps --project-directory=$HOME/$REPO
   - docker-compose logs --project-directory=$HOME/$REPO
+
+after_script:
+  - echo "after_script: $(whoami) on $PWD at $(uname -a)"
   - docker-compose push --project-directory=$HOME/$REPO
